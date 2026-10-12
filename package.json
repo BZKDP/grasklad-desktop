@@ -1,0 +1,71 @@
+{
+  "name": "grasklad-desktop",
+  "version": "1.0.41",
+  "description": "ГРА-склад — десктоп-приложение сборки заказов (kiosk WebView + принтер + отпечаток)",
+  "author": "Grasklad",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "rebuild": "electron-rebuild -f -w serialport",
+    "test": "node --test test/*.test.js",
+    "dist": "electron-builder --win --x64",
+    "pack": "electron-builder --dir"
+  },
+  "dependencies": {
+    "jimp": "^0.22.12",
+    "pdf-to-img": "^4.2.0"
+  },
+  "optionalDependencies": {
+    "@serialport/parser-readline": "^12.0.0",
+    "serialport": "^12.0.0"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "^3.7.0",
+    "electron": "^32.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "ru.grasklad.desktop",
+    "productName": "ГРА-склад Сборка",
+    "artifactName": "GRA-sklad-Setup-${version}.${ext}",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "node_modules/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "printer-driver",
+        "to": "printer-driver"
+      },
+      {
+        "from": "firmware",
+        "to": "firmware"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "ГРА-склад Сборка",
+      "runAfterFinish": true,
+      "include": "build/installer.nsh"
+    }
+  }
+}

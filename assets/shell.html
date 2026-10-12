@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>ГРА-склад Сборка</title>
+  <link rel="stylesheet" href="shell.css" />
+</head>
+<body>
+  <!-- Верхняя служебная панель (видна только на экранах оболочки, не поверх сайта) -->
+  <div id="topbar" class="topbar">
+    <div class="topbar-brand">ГРА-склад <span>Сборка</span></div>
+    <button id="btn-admin" class="btn-admin">Админка</button>
+  </div>
+
+  <!-- Короткий экран загрузки перед входом по логину и паролю. -->
+  <section id="screen-fp" class="screen screen-fp">
+    <div class="fp-card">
+      <div class="fp-title">Открываем рабочее место</div>
+      <div class="fp-password-login">
+        <button id="fp-password-login" class="btn btn-primary" type="button">ВОЙТИ ПО ЛОГИНУ И ПАРОЛЮ</button>
+      </div>
+
+      <!-- Статус железа на главном экране -->
+      <div class="hw-cards">
+        <div id="hw-printer-card" class="hw-card">
+          <span class="hw-dot"></span>
+          <div class="hw-card-body"><div class="hw-card-title">Принтер этикеток</div><div id="hw-printer-text" class="hw-card-text">проверка…</div></div>
+        </div>
+        <div id="hw-chz-printer-card" class="hw-card">
+          <span class="hw-dot"></span>
+          <div class="hw-card-body"><div class="hw-card-title">Принтер ЧЗ</div><div id="hw-chz-printer-text" class="hw-card-text">проверка…</div></div>
+        </div>
+        <div id="hw-dispenser-card" class="hw-card">
+          <span class="hw-dot"></span>
+          <div class="hw-card-body"><div class="hw-card-title">Дозатор ESP32</div><div id="hw-dispenser-text" class="hw-card-text">проверка…</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Нижняя полоска статуса подключения -->
+  <div id="statusbar" class="statusbar">
+    <div class="statusbar-item"><span id="sb-printer-dot" class="sb-dot"></span><span id="sb-printer">Принтер: проверка…</span></div>
+    <div class="statusbar-item"><span id="sb-chz-printer-dot" class="sb-dot"></span><span id="sb-chz-printer">ЧЗ: проверка…</span></div>
+    <div class="statusbar-item"><span id="sb-dispenser-dot" class="sb-dot"></span><span id="sb-dispenser">Дозатор: проверка…</span></div>
+    <div class="statusbar-spacer"></div>
+    <div class="statusbar-item statusbar-clock" id="sb-clock"></div>
+  </div>
+
+  <!-- Экран 2: рабочее место сотрудника (webview сайта) -->
+  <section id="screen-site" class="screen screen-site" hidden>
+    <webview id="site" class="site-webview" allowpopups
+             preload="./webview-preload.js" partition="persist:grasklad"></webview>
+    <div id="site-loader" class="site-loader" hidden>
+      <div class="loader-spinner"></div>
+      <div id="site-loader-text" class="loader-text">Открываем рабочее место…</div>
+      <button id="site-loader-retry" class="loader-retry" type="button" hidden>Обновить</button>
+    </div>
+    <div id="site-locker" class="site-locker" hidden>
+      <div class="fp-card">
+        <div class="fp-ring small"><div class="fp-ring-icon">☝</div></div>
+        <div class="fp-title">Сессия заблокирована</div>
+        <div id="site-locker-status" class="fp-status">Приложите палец, чтобы продолжить</div>
+        <div class="locker-admin">
+          <button id="locker-admin-btn" class="locker-admin-btn" type="button">Войти как админ</button>
+          <div id="locker-pin-box" class="locker-pin-box" hidden>
+            <div class="locker-pin-label">PIN администратора</div>
+            <input id="locker-pin" class="locker-pin-input" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="••••" autocomplete="off" />
+            <div id="locker-pin-err" class="locker-pin-err"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Экран 3: админка (вход суперадмина + управление отпечатками) -->
+  <section id="screen-admin" class="screen screen-admin" hidden>
+    <div class="admin-wrap">
+      <div class="admin-head">
+        <div class="admin-title">Админка приложения</div>
+        <button id="btn-admin-close" class="btn btn-ghost">Выйти</button>
+      </div>
+
+      <!-- Версия приложения / обновление -->
+      <div id="admin-version" class="admin-card">
+        <div class="admin-card-title">Версия приложения</div>
+        <div class="version-row">
+          <div class="version-info">
+            <div class="version-line">Установлена: <b id="ver-current">…</b></div>
+            <div class="version-line" id="ver-latest-line">Последняя: <b id="ver-latest">проверка…</b></div>
+            <div class="version-notes" id="ver-notes"></div>
+          </div>
+          <div class="version-actions">
+            <button id="btn-ver-check" class="btn">Проверить</button>
+            <button id="btn-ver-update" class="btn btn-primary" hidden>Обновить сейчас</button>
+          </div>
+        </div>
+        <div id="ver-status" class="admin-hint"></div>
+        <div id="ver-progress-wrap" class="ver-progress-wrap" hidden>
+          <div id="ver-progress-bar" class="ver-progress-bar"></div>
+        </div>
+      </div>
+
+      <!-- Логин суперадмина -->
+      <div id="admin-login" class="admin-card">
+        <div class="admin-card-title">Вход суперадмина</div>
+        <div class="field"><span>Логин</span><input id="admin-login-user" class="input" autocomplete="off" /></div>
+        <div class="field"><span>Пароль</span><input id="admin-login-pass" class="input" type="password" autocomplete="off" /></div>
+        <div id="admin-login-error" class="admin-error"></div>
+        <button id="btn-admin-signin" class="btn btn-primary">Войти</button>
+      </div>
+
+      <!-- Модуль отпечатка временно отключён; контейнер сохранён для будущего возврата. -->
+      <div id="admin-employees" class="admin-card" hidden style="display:none">
+        <div class="admin-card-head">
+          <div class="admin-card-title">Сотрудники — вход по отпечатку</div>
+          <button id="btn-add-employee" class="btn btn-primary btn-sm">+ Добавить сотрудника</button>
+        </div>
+        <div class="admin-hint">Отметьте «вход по отпечатку» и добавьте палец сотрудника (прикладывается 4 раза). Нужного сотрудника нет в списке? Нажмите «Добавить сотрудника» и найдите его в общей базе.</div>
+        <div id="admin-emp-list" class="admin-emp-list"></div>
+      </div>
+
+      <!-- Настройки приложения -->
+      <div id="admin-settings" class="admin-card" hidden>
+        <div class="admin-card-title">Настройки приложения</div>
+        <div class="field"><span>Адрес сайта</span><input id="cfg-site-url" class="input" /></div>
+        <div class="field" style="display:none"><span>COM-порт сканера</span><input id="cfg-serial" class="input" /></div>
+        <div class="field"><span>Очередь принтера</span><input id="cfg-printer" class="input" /></div>
+        <label class="field"><span>Печать Честного знака на втором принтере</span><input id="cfg-chz-enabled" type="checkbox" /></label>
+        <div class="field"><span>Очередь второго принтера ЧЗ</span><input id="cfg-chz-printer" class="input" placeholder="Автоматически или точное имя очереди" /></div>
+        <div class="admin-row">
+          <div class="field"><span>Ширина ЧЗ, мм</span><input id="cfg-chz-width" class="input" type="number" min="10" max="100" step="1" /></div>
+          <div class="field"><span>Высота ЧЗ, мм</span><input id="cfg-chz-height" class="input" type="number" min="10" max="100" step="1" /></div>
+          <div class="field"><span>Поворот ЧЗ</span><select id="cfg-chz-rotation" class="input"><option value="0">0°</option><option value="90">90°</option><option value="180">180°</option><option value="270">270°</option></select></div>
+          <div class="field"><span>Масштаб ЧЗ, %</span><input id="cfg-chz-scale" class="input" type="number" min="50" max="100" step="1" /></div>
+        </div>
+        <div class="admin-row">
+          <button id="btn-test-print" class="btn">Тест печати</button>
+          <button id="btn-test-chz-print" class="btn">Тест второго принтера ЧЗ</button>
+          <button id="btn-install-driver" class="btn">Установить драйверы оборудования</button>
+          <button id="btn-serial-diag" class="btn btn-ghost">Диагностика дозатора и портов</button>
+        </div>
+        <div id="admin-settings-status" class="admin-hint"></div>
+        <button id="btn-cfg-save" class="btn btn-primary">Сохранить настройки</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Модалка поиска и добавления сотрудника из общей базы -->
+  <div id="directory-modal" class="modal-overlay" hidden>
+    <div class="modal modal-wide">
+      <div class="modal-head">
+        <div class="modal-title">Добавить сотрудника</div>
+        <button id="directory-close" class="btn btn-ghost btn-sm">Закрыть</button>
+      </div>
+      <input id="directory-search" class="input" placeholder="Поиск по имени или логину…" autocomplete="off" />
+      <div id="directory-status" class="admin-hint">Загрузка списка…</div>
+      <div id="directory-list" class="directory-list"></div>
+    </div>
+  </div>
+
+  <!-- Модалка регистрации отпечатка -->
+  <div id="enroll-modal" class="modal-overlay" hidden>
+    <div class="modal">
+      <div class="modal-title" id="enroll-title">Регистрация отпечатка</div>
+      <div class="fp-ring mid"><div class="fp-ring-icon">☝</div></div>
+      <div id="enroll-status" class="fp-status">Приложите палец сотрудника…</div>
+      <div id="enroll-error" class="fp-error"></div>
+      <div class="modal-actions">
+        <button id="enroll-cancel" class="btn btn-ghost">Отмена</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="shell.js"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "siteUrl": "http://SERVER_HOST/sborka/",
+  "desktopSecret": "CHANGE_ME_DESKTOP_SECRET",
+  "serialPort": "AUTO",
+  "serialBaud": 115200,
+  "dispenserPort": "AUTO",
+  "dispenserBaud": 115200,
+  "dispenserHoldMs": 900,
+  "idleLogoutMs": 300000,
+  "printerQueue": "Xprinter XP-365B",
+  "labelWidthMm": 58,
+  "labelHeightMm": 40,
+  "chzPrinterEnabled": false,
+  "chzPrinterQueue": "",
+  "chzLabelWidthMm": 20,
+  "chzLabelHeightMm": 20,
+  "chzLabelRotation": 0,
+  "chzLabelScale": 0.93,
+  "chzLocalUrl": "http://127.0.0.1:3030"
+}

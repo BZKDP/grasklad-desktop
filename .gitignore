@@ -1,0 +1,45 @@
+# dependencies
+node_modules/
+
+# build output / installers
+dist/
+out/
+release/
+build/
+*.exe
+*.nsis
+*.blockmap
+
+# local config / secrets
+config.json
+.env
+.env.*
+*.key
+*.pem
+auth.json
+
+# logs & temp
+logs/
+*.log
+tmp/
+backups/
+
+# OS / editors
+desktop.ini
+Thumbs.db
+.idea/
+.vscode/
+.cache/
+
+# ESP32 build artifacts
+firmware/**/build/
+*.ino.map
+
+# Manufacturer driver packages are installed separately
+printer-driver/*
+!printer-driver/*.ps1
+!printer-driver/*.bat
+!printer-driver/*.cmd
+!printer-driver/*.txt
+!printer-driver/*.md
+
